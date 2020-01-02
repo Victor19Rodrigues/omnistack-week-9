@@ -17,22 +17,24 @@ export default function Book({ navigation }) {
   const [date, setDate] = useState("");
   const id = navigation.getParam("id");
 
-  async function handleSubmit() {
-    const user_id = await AsyncStorage.getItem("user");
+  function handleSubmit() {
+    AsyncStorage.getItem("user").then(user => {
+      if (user) {
+        api.post(
+          `/spots/${id}/bookings`,
+          {
+            date
+          },
+          {
+            headers: { user_id: user }
+          }
+        );
 
-    await api.post(
-      `/spots/${id}/bookings`,
-      {
-        date
-      },
-      {
-        headers: { user_id }
+        Alert.alert("Solicitação de reserva enviada.");
+
+        navigation.navigate("List");
       }
-    );
-
-    Alert.alert("Solicitação de reserva enviada.");
-
-    navigation.navigate("List");
+    });
   }
 
   function handleCancel() {
@@ -49,7 +51,7 @@ export default function Book({ navigation }) {
         autoCapitalize="words"
         autoCorrect={false}
         value={date}
-        onChange={setDate}
+        onChangeText={setDate}
       />
 
       <TouchableOpacity onPress={handleSubmit} style={styles.button}>
